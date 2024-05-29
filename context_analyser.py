@@ -2,13 +2,15 @@ import re
 import numpy as np
 
 class ContextAnalyser():
-    def __init__(self, execute_all=True):
+    def __init__(self, execute_all=True, file1='files/zdania.txt', file2='files/konteksty.txt'):
         self.stopwords = self.polish_stopwords()
         self.context_dict = self.context_dictionary()
         self.words = []
+        self.sentences = []
+        self.contexts = []
         if execute_all:
-            self.read_sentences()
-            self.read_contexts()
+            self.read_sentences(file1)
+            self.read_contexts(file2)
     
     def clean(self, text):
         res = ""
@@ -40,20 +42,20 @@ class ContextAnalyser():
                     words += sentence.split(" ")
                     sentence = ""
                     count_breaks = 0
-            self.words = sorted(list(set(words)))
-            self.sentences = sentences
+            self.words = sorted(list(set(words).union(set(self.words))))
+            self.sentences += sentences
 
 
     def read_contexts(self, filename='files/konteksty.txt'):
         contexts = []
-        with open('files/konteksty.txt', 'r', encoding='utf8') as f:
+        with open(filename, 'r', encoding='utf8') as f:
             while word := f.readline():
                 word = word.replace("\n", "")
                 contexts.append(word)
-        self.contexts = contexts
-        self.contexts_set = list(set(contexts))
+        self.contexts += contexts
+        self.contexts_set = list(set(contexts) .union(set(self.contexts)))
 
-
+        
     def vectorize(self, sentence):
         sentence_L = sentence.split(" ")
         vector = np.zeros(len(self.words))
